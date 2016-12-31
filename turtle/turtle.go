@@ -17,12 +17,12 @@ const (
 )
 
 const (
-	GoUp = iota
+	NoCommand = iota
+	GoUp
 	GoLeft
 	TurnR
 	TurnL
 	Stop
-	NoCommand
 )
 
 var UpColor = color.RGBA{7, 84, 19, 255}
@@ -31,23 +31,16 @@ var StopColor = color.RGBA{51, 69, 169, 255}
 var TurnRColor = color.RGBA{182, 149, 72, 255}
 var TurnLColor = color.RGBA{123, 131, 154, 255}
 
+var colorMap = map[color.Color]int{
+	UpColor:    GoUp,
+	LeftColor:  GoLeft,
+	StopColor:  Stop,
+	TurnRColor: TurnR,
+	TurnLColor: TurnL,
+}
+
 func colorCommand(col color.Color) int {
-	if isEqualColor(col, UpColor) {
-		return GoUp
-	}
-	if isEqualColor(col, LeftColor) {
-		return GoLeft
-	}
-	if isEqualColor(col, StopColor) {
-		return Stop
-	}
-	if isEqualColor(col, TurnRColor) {
-		return TurnR
-	}
-	if isEqualColor(col, TurnLColor) {
-		return TurnL
-	}
-	return NoCommand
+	return colorMap[col]
 }
 
 func isEqualColor(col1, col2 color.Color) bool {
@@ -62,9 +55,6 @@ func Decrypt(m image.Image) image.Image {
 	fmt.Println(m.ColorModel())
 	drawing := false
 
-	r, g, b, a := color.RGBA{7, 84, 19, 255}.RGBA()
-	fmt.Println("Success", r, g, b, a)
-
 	fmt.Println("Image size is ", bounds.Min, bounds.Max)
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
@@ -73,7 +63,6 @@ func Decrypt(m image.Image) image.Image {
 				secret.Set(x, y, drawColor)
 				drawing = command == NoCommand || command == GoLeft
 			} else if command == GoLeft {
-				fmt.Println("Drawing")
 				drawing = true
 			}
 		}
