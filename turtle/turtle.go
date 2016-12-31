@@ -39,16 +39,6 @@ var colorMap = map[color.Color]int{
 	TurnLColor: TurnL,
 }
 
-func colorCommand(col color.Color) int {
-	return colorMap[col]
-}
-
-func isEqualColor(col1, col2 color.Color) bool {
-	r1, g1, b1, _ := col1.RGBA()
-	r2, g2, b2, _ := col2.RGBA()
-	return r1 == r2 && g1 == g2 && b1 == b2
-}
-
 func Decrypt(m image.Image) image.Image {
 	bounds := m.Bounds()
 	secret = image.NewRGBA(bounds)
@@ -58,7 +48,7 @@ func Decrypt(m image.Image) image.Image {
 	fmt.Println("Image size is ", bounds.Min, bounds.Max)
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
-			command := colorCommand(m.At(x, y))
+			command := colorMap[m.At(x, y)]
 			if drawing {
 				secret.Set(x, y, drawColor)
 				drawing = command == NoCommand || command == GoLeft
