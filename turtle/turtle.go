@@ -53,7 +53,7 @@ func (t *Turtle) Decrypt(m image.Image) image.Image {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
 			command := t.colorMap[m.At(x, y)]
 			if command == GoUp || command == GoLeft {
-				t.DrawNextLine(x, y, command, NoDir)
+				t.drawNextLine(x, y, command, NoDir)
 			}
 		}
 	}
@@ -61,20 +61,20 @@ func (t *Turtle) Decrypt(m image.Image) image.Image {
 	return t.secret
 }
 
-func (t *Turtle) DrawNextLine(x, y, command, direction int) {
+func (t *Turtle) drawNextLine(x, y, command, direction int) {
 	switch command {
 	case GoUp:
-		t.DrawLine(x, y, Up)
+		t.drawLine(x, y, Up)
 	case GoLeft:
-		t.DrawLine(x, y, Left)
+		t.drawLine(x, y, Left)
 	case TurnR:
-		t.DrawLine(x, y, (direction+1)%4)
+		t.drawLine(x, y, (direction+1)%4)
 	case TurnL:
-		t.DrawLine(x, y, (direction+3)%4)
+		t.drawLine(x, y, (direction+3)%4)
 	}
 }
 
-func (t *Turtle) DrawLine(x, y, direction int) {
+func (t *Turtle) drawLine(x, y, direction int) {
 	curX := x
 	curY := y
 	command := NoCommand
@@ -93,18 +93,18 @@ func (t *Turtle) DrawLine(x, y, direction int) {
 	}
 
 	if direction == Left || direction == Up {
-		DrawRect(t.secret, image.Pt(curX, curY), image.Pt(x, y))
+		drawRect(t.secret, image.Pt(curX, curY), image.Pt(x, y))
 	} else {
-		DrawRect(t.secret, image.Pt(x, y), image.Pt(curX, curY))
+		drawRect(t.secret, image.Pt(x, y), image.Pt(curX, curY))
 	}
 
 	if command != Stop {
-		t.DrawNextLine(curX, curY, command, direction)
+		t.drawNextLine(curX, curY, command, direction)
 	}
 }
 
 // Fill in rectangle - though only used to draw lines
-func DrawRect(dst *image.RGBA, p1, p2 image.Point) {
+func drawRect(dst *image.RGBA, p1, p2 image.Point) {
 	for x := p1.X; x <= p2.X; x++ {
 		for y := p1.Y; y <= p2.Y; y++ {
 			dst.Set(x, y, drawColor)
