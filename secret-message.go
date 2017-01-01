@@ -28,13 +28,12 @@ func main() {
 	var TurnRColor = color.RGBA{182, 149, 72, 255}
 	var TurnLColor = color.RGBA{123, 131, 154, 255}
 
-	decrypter := turtle.Decrypter(
-		UpColor,
-		LeftColor,
-		StopColor,
-		TurnRColor,
-		TurnLColor,
-	)
+	decrypter := turtle.Decrypter()
+	decrypter.SetCommand(turtle.GoUp, UpColor)
+	decrypter.SetCommand(turtle.GoLeft, LeftColor)
+	decrypter.SetCommand(turtle.Stop, StopColor)
+	decrypter.SetCommand(turtle.TurnR, TurnRColor)
+	decrypter.SetCommand(turtle.TurnL, TurnLColor)
 
 	fmt.Println("Image loaded and ready")
 	bounds := m.Bounds()

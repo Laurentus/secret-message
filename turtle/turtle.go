@@ -30,16 +30,14 @@ type Turtle struct {
 	code     image.Image
 }
 
-func Decrypter(UpColor, LeftColor, StopColor, TurnRColor, TurnLColor color.Color) *Turtle {
+func Decrypter() *Turtle {
 	// If color doesn't match, map will return NoCommand as zero value
-	colorMap := map[color.Color]int{
-		UpColor:    GoUp,
-		LeftColor:  GoLeft,
-		StopColor:  Stop,
-		TurnRColor: TurnR,
-		TurnLColor: TurnL,
-	}
+	colorMap := make(map[color.Color]int)
 	return &Turtle{colorMap: colorMap}
+}
+
+func (t *Turtle) SetCommand(command int, clr color.Color) {
+	t.colorMap[clr] = command
 }
 
 func (t *Turtle) Decrypt(m image.Image) image.Image {
