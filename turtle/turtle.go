@@ -33,6 +33,7 @@ var StopColor = color.RGBA{51, 69, 169, 255}
 var TurnRColor = color.RGBA{182, 149, 72, 255}
 var TurnLColor = color.RGBA{123, 131, 154, 255}
 
+// If color doesn't match, map will return NoCommand as zero value
 var colorMap = map[color.Color]int{
 	UpColor:    GoUp,
 	LeftColor:  GoLeft,
@@ -59,6 +60,19 @@ func Decrypt(m image.Image) image.Image {
 	return secret
 }
 
+func DrawNextLine(x, y, command, direction int) {
+	switch command {
+	case GoUp:
+		DrawLine(x, y, Up)
+	case GoLeft:
+		DrawLine(x, y, Left)
+	case TurnR:
+		DrawLine(x, y, (direction+1)%4)
+	case TurnL:
+		DrawLine(x, y, (direction+3)%4)
+	}
+}
+
 func DrawLine(x, y, direction int) {
 	curX := x
 	curY := y
@@ -67,16 +81,12 @@ func DrawLine(x, y, direction int) {
 		switch direction {
 		case Up:
 			curY--
-			break
 		case Down:
 			curY++
-			break
 		case Left:
 			curX--
-			break
 		case Right:
 			curX++
-			break
 		}
 		command = colorMap[code.At(curX, curY)]
 	}
@@ -92,24 +102,7 @@ func DrawLine(x, y, direction int) {
 	}
 }
 
-func DrawNextLine(x, y, command, direction int) {
-	switch command {
-	case GoUp:
-		DrawLine(x, y, Up)
-		break
-	case GoLeft:
-		DrawLine(x, y, Left)
-		break
-	case TurnR:
-		DrawLine(x, y, (direction+1)%4)
-		break
-	case TurnL:
-		DrawLine(x, y, (direction+3)%4)
-		break
-	}
-}
-
-// Draw a line between points p1 and p2
+// Fill in rectangle - though only used to draw lines
 func DrawRect(p1, p2 image.Point) {
 	for x := p1.X; x <= p2.X; x++ {
 		for y := p1.Y; y <= p2.Y; y++ {
