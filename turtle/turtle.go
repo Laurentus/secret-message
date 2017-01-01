@@ -1,7 +1,6 @@
 package turtle
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 )
@@ -48,12 +47,11 @@ func (t *Turtle) Decrypt(m image.Image) image.Image {
 	bounds := m.Bounds()
 	t.secret = image.NewRGBA(bounds)
 
-	fmt.Println("Image size is ", bounds.Min, bounds.Max)
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
 			command := t.colorMap[m.At(x, y)]
 			if command == GoUp || command == GoLeft {
-				t.drawNextLine(x, y, command, NoDir)
+				t.DrawNextLine(x, y, command, NoDir)
 			}
 		}
 	}
@@ -61,7 +59,7 @@ func (t *Turtle) Decrypt(m image.Image) image.Image {
 	return t.secret
 }
 
-func (t *Turtle) drawNextLine(x, y, command, direction int) {
+func (t *Turtle) DrawNextLine(x, y, command, direction int) {
 	switch command {
 	case GoUp:
 		t.drawLine(x, y, Up)
@@ -99,7 +97,7 @@ func (t *Turtle) drawLine(x, y, direction int) {
 	}
 
 	if command != Stop {
-		t.drawNextLine(curX, curY, command, direction)
+		t.DrawNextLine(curX, curY, command, direction)
 	}
 }
 

@@ -37,6 +37,8 @@ func main() {
 	)
 
 	fmt.Println("Image loaded and ready")
+	bounds := m.Bounds()
+	fmt.Println("Image size is ", bounds.Min, bounds.Max)
 	secret := decrypter.Decrypt(m)
 	fmt.Println("Secret decoded and saving to file")
 
