@@ -7,8 +7,6 @@ import (
 )
 
 var drawColor = color.RGBA{0, 0, 0, 255}
-var secret *image.RGBA
-var code image.Image
 
 const (
 	Up = iota
@@ -27,53 +25,56 @@ const (
 	Stop
 )
 
-var UpColor = color.RGBA{7, 84, 19, 255}
-var LeftColor = color.RGBA{139, 57, 137, 255}
-var StopColor = color.RGBA{51, 69, 169, 255}
-var TurnRColor = color.RGBA{182, 149, 72, 255}
-var TurnLColor = color.RGBA{123, 131, 154, 255}
-
-// If color doesn't match, map will return NoCommand as zero value
-var colorMap = map[color.Color]int{
-	UpColor:    GoUp,
-	LeftColor:  GoLeft,
-	StopColor:  Stop,
-	TurnRColor: TurnR,
-	TurnLColor: TurnL,
+type Turtle struct {
+	colorMap map[color.Color]int
+	secret   *image.RGBA
+	code     image.Image
 }
 
-func Decrypt(m image.Image) image.Image {
-	code = m
+func Decrypter(UpColor, LeftColor, StopColor, TurnRColor, TurnLColor color.Color) *Turtle {
+	// If color doesn't match, map will return NoCommand as zero value
+	colorMap := map[color.Color]int{
+		UpColor:    GoUp,
+		LeftColor:  GoLeft,
+		StopColor:  Stop,
+		TurnRColor: TurnR,
+		TurnLColor: TurnL,
+	}
+	return &Turtle{colorMap: colorMap}
+}
+
+func (t *Turtle) Decrypt(m image.Image) image.Image {
+	t.code = m
 	bounds := m.Bounds()
-	secret = image.NewRGBA(bounds)
+	t.secret = image.NewRGBA(bounds)
 
 	fmt.Println("Image size is ", bounds.Min, bounds.Max)
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
-			command := colorMap[m.At(x, y)]
+			command := t.colorMap[m.At(x, y)]
 			if command == GoUp || command == GoLeft {
-				DrawNextLine(x, y, command, NoDir)
+				t.DrawNextLine(x, y, command, NoDir)
 			}
 		}
 	}
 
-	return secret
+	return t.secret
 }
 
-func DrawNextLine(x, y, command, direction int) {
+func (t *Turtle) DrawNextLine(x, y, command, direction int) {
 	switch command {
 	case GoUp:
-		DrawLine(x, y, Up)
+		t.DrawLine(x, y, Up)
 	case GoLeft:
-		DrawLine(x, y, Left)
+		t.DrawLine(x, y, Left)
 	case TurnR:
-		DrawLine(x, y, (direction+1)%4)
+		t.DrawLine(x, y, (direction+1)%4)
 	case TurnL:
-		DrawLine(x, y, (direction+3)%4)
+		t.DrawLine(x, y, (direction+3)%4)
 	}
 }
 
-func DrawLine(x, y, direction int) {
+func (t *Turtle) DrawLine(x, y, direction int) {
 	curX := x
 	curY := y
 	command := NoCommand
@@ -88,25 +89,25 @@ func DrawLine(x, y, direction int) {
 		case Right:
 			curX++
 		}
-		command = colorMap[code.At(curX, curY)]
+		command = t.colorMap[t.code.At(curX, curY)]
 	}
 
 	if direction == Left || direction == Up {
-		DrawRect(image.Pt(curX, curY), image.Pt(x, y))
+		DrawRect(t.secret, image.Pt(curX, curY), image.Pt(x, y))
 	} else {
-		DrawRect(image.Pt(x, y), image.Pt(curX, curY))
+		DrawRect(t.secret, image.Pt(x, y), image.Pt(curX, curY))
 	}
 
 	if command != Stop {
-		DrawNextLine(curX, curY, command, direction)
+		t.DrawNextLine(curX, curY, command, direction)
 	}
 }
 
 // Fill in rectangle - though only used to draw lines
-func DrawRect(p1, p2 image.Point) {
+func DrawRect(dst *image.RGBA, p1, p2 image.Point) {
 	for x := p1.X; x <= p2.X; x++ {
 		for y := p1.Y; y <= p2.Y; y++ {
-			secret.Set(x, y, drawColor)
+			dst.Set(x, y, drawColor)
 		}
 	}
 }
