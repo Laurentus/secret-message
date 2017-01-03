@@ -25,9 +25,9 @@ const (
 )
 
 type Turtle struct {
-	colorMap map[color.Color]int
-	secret   *image.RGBA
-	code     image.Image
+	colorMap  map[color.Color]int
+	secret    *image.RGBA
+	encrypted image.Image
 }
 
 func Decrypter() *Turtle {
@@ -41,15 +41,15 @@ func (t *Turtle) SetCommand(command int, clr color.Color) {
 }
 
 func (t *Turtle) Decrypt(m image.Image) image.Image {
-	t.code = m
+	t.encrypted = m
 	bounds := m.Bounds()
 	t.secret = image.NewRGBA(bounds)
 
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
-			command := t.colorMap[m.At(x, y)]
+			command := t.colorMap[t.encrypted.At(x, y)]
 			if command == GoUp || command == GoLeft {
-				t.DrawNextLine(x, y, command, NoDir)
+				t.drawNextLine(x, y, command, NoDir)
 			}
 		}
 	}
@@ -57,7 +57,7 @@ func (t *Turtle) Decrypt(m image.Image) image.Image {
 	return t.secret
 }
 
-func (t *Turtle) DrawNextLine(x, y, command, direction int) {
+func (t *Turtle) drawNextLine(x, y, command, direction int) {
 	switch command {
 	case GoUp:
 		t.drawLine(x, y, Up)
@@ -70,6 +70,7 @@ func (t *Turtle) DrawNextLine(x, y, command, direction int) {
 	}
 }
 
+// Draw line until stop is reached
 func (t *Turtle) drawLine(x, y, direction int) {
 	curX := x
 	curY := y
@@ -85,7 +86,7 @@ func (t *Turtle) drawLine(x, y, direction int) {
 		case Right:
 			curX++
 		}
-		command = t.colorMap[t.code.At(curX, curY)]
+		command = t.colorMap[t.encrypted.At(curX, curY)]
 	}
 
 	if direction == Left || direction == Up {
@@ -95,7 +96,7 @@ func (t *Turtle) drawLine(x, y, direction int) {
 	}
 
 	if command != Stop {
-		t.DrawNextLine(curX, curY, command, direction)
+		t.drawNextLine(curX, curY, command, direction)
 	}
 }
 
