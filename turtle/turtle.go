@@ -57,34 +57,31 @@ func (t *Turtle) Decrypt(m image.Image) (image.Image, []*image.Paletted) {
 
 func (t *Turtle) findSecret(done chan bool) {
 	bounds := t.encrypted.Bounds()
-	for y := 0; y < bounds.Max.Y; y++ {
-		for x := 0; x < bounds.Max.X; x++ {
-			command := t.colorMap[t.encrypted.At(x, y)]
-			if command == GoUp || command == GoLeft {
-				t.drawNextLine(x, y, command, NoDir)
-				time.Sleep(1 * time.Millisecond)
-			}
+
+	// Iterate diagonal by diagonal to provide nicer gif
+	x := 0
+	y := 0
+	for total := 0; total < bounds.Max.Y+bounds.Max.X; {
+		if x == 0 {
+			total++
+			x = total
+			y = 0
+		} else {
+			y++
+			x--
+		}
+
+		// Skip pixels outside the image
+		if y >= bounds.Max.Y || x >= bounds.Max.X {
+			continue
+		}
+		command := t.colorMap[t.encrypted.At(x, y)]
+		if command == GoUp || command == GoLeft {
+			t.drawNextLine(x, y, command, NoDir)
+			time.Sleep(1 * time.Millisecond)
 		}
 	}
 	done <- true
-}
-
-func (t *Turtle) takeSnapshots(done chan bool) {
-	i := 0
-
-	for {
-		select {
-		case <-done:
-			return
-		default:
-			time.Sleep(1 * time.Millisecond)
-			snapshot := image.NewPaletted(t.secret.Bounds(), palette.Plan9)
-			snapshot.Pix = make([]uint8, len(t.secret.Pix))
-			copy(snapshot.Pix, t.secret.Pix)
-			t.snapshots[i] = snapshot
-			i++
-		}
-	}
 }
 
 func (t *Turtle) drawNextLine(x, y, command, direction int) {
@@ -135,6 +132,24 @@ func drawRect(dst *image.Paletted, p1, p2 image.Point) {
 	for x := p1.X; x <= p2.X; x++ {
 		for y := p1.Y; y <= p2.Y; y++ {
 			dst.Set(x, y, drawColor)
+		}
+	}
+}
+
+func (t *Turtle) takeSnapshots(done chan bool) {
+	i := 0
+
+	for {
+		select {
+		case <-done:
+			return
+		default:
+			time.Sleep(1 * time.Millisecond)
+			snapshot := image.NewPaletted(t.secret.Bounds(), palette.Plan9)
+			snapshot.Pix = make([]uint8, len(t.secret.Pix))
+			copy(snapshot.Pix, t.secret.Pix)
+			t.snapshots[i] = snapshot
+			i++
 		}
 	}
 }
