@@ -36,7 +36,7 @@ type Turtle struct {
 func Decrypter() *Turtle {
 	// If color doesn't match, map will return NoCommand as zero value
 	colorMap := make(map[color.Color]int)
-	snapshots := make([]*image.Paletted, 50)
+	snapshots := make([]*image.Paletted, 200)
 	return &Turtle{colorMap: colorMap, snapshots: snapshots}
 }
 
@@ -57,8 +57,8 @@ func (t *Turtle) Decrypt(m image.Image) (image.Image, []*image.Paletted) {
 
 func (t *Turtle) findSecret(done chan bool) {
 	bounds := t.encrypted.Bounds()
-	for y := bounds.Max.Y - 1; y >= 0; y-- {
-		for x := bounds.Max.X - 1; x >= 0; x-- {
+	for y := 0; y < bounds.Max.Y; y++ {
+		for x := 0; x < bounds.Max.X; x++ {
 			command := t.colorMap[t.encrypted.At(x, y)]
 			if command == GoUp || command == GoLeft {
 				t.drawNextLine(x, y, command, NoDir)
@@ -77,7 +77,7 @@ func (t *Turtle) takeSnapshots(done chan bool) {
 		case <-done:
 			return
 		default:
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(1 * time.Millisecond)
 			snapshot := image.NewPaletted(t.secret.Bounds(), palette.Plan9)
 			snapshot.Pix = make([]uint8, len(t.secret.Pix))
 			copy(snapshot.Pix, t.secret.Pix)

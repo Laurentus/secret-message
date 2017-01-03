@@ -57,7 +57,7 @@ func main() {
 			break
 		}
 		outGif.Image = append(outGif.Image, inImage)
-		outGif.Delay = append(outGif.Delay, 50)
+		outGif.Delay = append(outGif.Delay, 5)
 	}
 
 	g, err := os.Create("secret.gif")
