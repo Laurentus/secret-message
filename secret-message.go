@@ -39,7 +39,7 @@ func main() {
 	fmt.Println("Image loaded and ready")
 	bounds := m.Bounds()
 	fmt.Println("Image size is ", bounds.Min, bounds.Max)
-	secret := decrypter.Decrypt(m)
+	secret, snapshots := decrypter.Decrypt(m)
 	fmt.Println("Secret decoded and saving to file")
 
 	f, err := os.Create("secret.png")
@@ -52,10 +52,12 @@ func main() {
 	// Construct GIF from images.
 	fmt.Println("Creating secret gif")
 	outGif := &gif.GIF{}
-	images := []image.Image{secret}
-	for _, inImage := range images {
-		outGif.Image = append(outGif.Image, inImage.(*image.Paletted))
-		outGif.Delay = append(outGif.Delay, 0)
+	for _, inImage := range snapshots {
+		if inImage == nil {
+			break
+		}
+		outGif.Image = append(outGif.Image, inImage)
+		outGif.Delay = append(outGif.Delay, 50)
 	}
 
 	g, err := os.Create("secret.gif")
