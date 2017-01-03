@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/color"
 	"image/color/palette"
-	"time"
 )
 
 var drawColor = color.RGBA{0, 255, 0, 255}
@@ -48,19 +47,19 @@ func (t *Turtle) Decrypt(m image.Image) (image.Image, []*image.Paletted) {
 	t.encrypted = m
 	t.secret = image.NewPaletted(t.encrypted.Bounds(), palette.Plan9)
 
-	done := make(chan bool)
-	go t.findSecret(done)
-	t.takeSnapshots(done)
+	t.findSecret()
 
 	return t.secret, t.snapshots
 }
 
-func (t *Turtle) findSecret(done chan bool) {
+func (t *Turtle) findSecret() {
 	bounds := t.encrypted.Bounds()
 
 	// Iterate diagonal by diagonal to provide nicer gif
 	x := 0
 	y := 0
+	t.takeSnapshot(0)
+	snapshotIdx := 1
 	for total := 0; total < bounds.Max.Y+bounds.Max.X; {
 		if x == 0 {
 			total++
@@ -78,10 +77,10 @@ func (t *Turtle) findSecret(done chan bool) {
 		command := t.colorMap[t.encrypted.At(x, y)]
 		if command == GoUp || command == GoLeft {
 			t.drawNextLine(x, y, command, NoDir)
-			time.Sleep(1 * time.Millisecond)
+			t.takeSnapshot(snapshotIdx)
+			snapshotIdx++
 		}
 	}
-	done <- true
 }
 
 func (t *Turtle) drawNextLine(x, y, command, direction int) {
@@ -136,20 +135,9 @@ func drawRect(dst *image.Paletted, p1, p2 image.Point) {
 	}
 }
 
-func (t *Turtle) takeSnapshots(done chan bool) {
-	i := 0
-
-	for {
-		select {
-		case <-done:
-			return
-		default:
-			time.Sleep(1 * time.Millisecond)
-			snapshot := image.NewPaletted(t.secret.Bounds(), palette.Plan9)
-			snapshot.Pix = make([]uint8, len(t.secret.Pix))
-			copy(snapshot.Pix, t.secret.Pix)
-			t.snapshots[i] = snapshot
-			i++
-		}
-	}
+func (t *Turtle) takeSnapshot(snapshotIdx int) {
+	snapshot := image.NewPaletted(t.secret.Bounds(), palette.Plan9)
+	snapshot.Pix = make([]uint8, len(t.secret.Pix))
+	copy(snapshot.Pix, t.secret.Pix)
+	t.snapshots[snapshotIdx] = snapshot
 }
