@@ -3,9 +3,10 @@ package turtle
 import (
 	"image"
 	"image/color"
+	"image/color/palette"
 )
 
-var drawColor = color.RGBA{0, 0, 0, 255}
+var drawColor = color.RGBA{0, 255, 0, 255}
 
 const (
 	Up = iota
@@ -26,7 +27,7 @@ const (
 
 type Turtle struct {
 	colorMap  map[color.Color]int
-	secret    *image.RGBA
+	secret    *image.Paletted
 	encrypted image.Image
 }
 
@@ -43,7 +44,7 @@ func (t *Turtle) SetCommand(command int, clr color.Color) {
 func (t *Turtle) Decrypt(m image.Image) image.Image {
 	t.encrypted = m
 	bounds := m.Bounds()
-	t.secret = image.NewRGBA(bounds)
+	t.secret = image.NewPaletted(bounds, palette.Plan9)
 
 	for y := bounds.Max.Y - 1; y >= 0; y-- {
 		for x := bounds.Max.X - 1; x >= 0; x-- {
@@ -101,7 +102,7 @@ func (t *Turtle) drawLine(x, y, direction int) {
 }
 
 // Fill in rectangle - though only used to draw lines
-func drawRect(dst *image.RGBA, p1, p2 image.Point) {
+func drawRect(dst *image.Paletted, p1, p2 image.Point) {
 	for x := p1.X; x <= p2.X; x++ {
 		for y := p1.Y; y <= p2.Y; y++ {
 			dst.Set(x, y, drawColor)

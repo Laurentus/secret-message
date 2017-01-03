@@ -5,6 +5,7 @@ import (
 	"github.com/Laurentus/secret-message/turtle"
 	"image"
 	"image/color"
+	"image/gif"
 	"image/png"
 	"log"
 	"os"
@@ -47,4 +48,20 @@ func main() {
 	}
 	defer f.Close()
 	png.Encode(f, secret)
+
+	// Construct GIF from images.
+	fmt.Println("Creating secret gif")
+	outGif := &gif.GIF{}
+	images := []image.Image{secret}
+	for _, inImage := range images {
+		outGif.Image = append(outGif.Image, inImage.(*image.Paletted))
+		outGif.Delay = append(outGif.Delay, 0)
+	}
+
+	g, err := os.Create("secret.gif")
+	if err != nil {
+		panic(err)
+	}
+	defer g.Close()
+	gif.EncodeAll(g, outGif)
 }
