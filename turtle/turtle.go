@@ -35,6 +35,7 @@ type Turtle struct {
 func Decrypter() *Turtle {
 	// If color doesn't match, map will return NoCommand as zero value
 	colorMap := make(map[color.Color]int)
+	// Allocate enough space for pictures as dynamic allocation can be slow
 	snapshots := make([]*image.Paletted, 200)
 	return &Turtle{colorMap: colorMap, snapshots: snapshots}
 }
@@ -55,25 +56,19 @@ func (t *Turtle) Decrypt(m image.Image) (image.Image, []*image.Paletted) {
 func (t *Turtle) findSecret() {
 	bounds := t.encrypted.Bounds()
 
-	// Iterate diagonal by diagonal to provide nicer gif
-	x := 0
-	y := 0
+	// Take starting snapshot to provide nice black start screen
 	t.takeSnapshot(0)
 	snapshotIdx := 1
-	for total := 0; total < bounds.Max.Y+bounds.Max.X; {
-		if x == 0 {
-			total++
-			x = total
-			y = 0
-		} else {
-			y++
-			x--
-		}
 
+	// Iterate diagonal by diagonal to provide nicer gif
+	x, y, total := nextDiagonalPoint(0, 0, 0)
+	for total < bounds.Max.X+bounds.Max.Y {
+		x, y, total = nextDiagonalPoint(x, y, total)
 		// Skip pixels outside the image
 		if y >= bounds.Max.Y || x >= bounds.Max.X {
 			continue
 		}
+
 		command := t.colorMap[t.encrypted.At(x, y)]
 		if command == GoUp || command == GoLeft {
 			t.drawNextLine(x, y, command, NoDir)
@@ -81,6 +76,19 @@ func (t *Turtle) findSecret() {
 			snapshotIdx++
 		}
 	}
+}
+
+func nextDiagonalPoint(x, y, total int) (int, int, int) {
+	if x == 0 {
+		total++
+		x = total
+		y = 0
+	} else {
+		y++
+		x--
+	}
+
+	return x, y, total
 }
 
 func (t *Turtle) drawNextLine(x, y, command, direction int) {
