@@ -1,5 +1,9 @@
 Solution to https://github.com/wunderdogsw/wunderpahkina-vol5 
 
-Copy to your GOPATH/src folder
+To install:
+`go get github.com/Laurentus/secret-message`
 
-go run secret-message.go
+To run:
+`go run secret-message.go`
+
+Generates secret.png with the answer & secret.gif and animation of how it was reached
